@@ -113,6 +113,7 @@ module datapath(
     // alu
     wire [15:0] alu_result;
     wire zero;
+    wire [15:0] memory_read_data;
 
     alu alu_unit(
     .operand1(data_read1),
@@ -122,7 +123,20 @@ module datapath(
     .zeroout(zero)
 );
 
-    // writeback to alu for now with no memory
-    assign write_back_data = alu_result;
+data_memory data_mem(
+    .clock(clock),
+    .mem_read(mem_read),
+    .mem_write(mem_write),
+    .address(alu_result),
+    .write_data(data_read2),
+    .read_data(memory_read_data)
+);
+
+mux writeback_mux(
+    .in0(alu_result),
+    .in1(memory_read_data),
+    .select(mem_to_reg),
+    .out(write_back_data)
+);
 
 endmodule
