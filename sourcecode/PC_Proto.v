@@ -23,7 +23,9 @@
 module PC_Proto(
     input clock,
     input reset,
-    output reg [15:0] pc
+    output reg [15:0] pc,
+    input [15:0] next_pc
+    
     
     );
     initial pc = 0;
@@ -31,7 +33,7 @@ module PC_Proto(
     if(reset)
         pc <= 0;
      else
-        pc <= pc + 2; 
+        pc <= next_pc; /* If not reset, could be pc + 2, jump to label, or branch to label */ 
         end
     
 endmodule
