@@ -27,12 +27,14 @@ module datapath(
     
    // pc call 
     wire [15:0] pc_value;
+    wire [15:0] next_pc;
     wire [15:0] instruction;
 
     PC_Proto pc_unit(
         .clock(clock),
         .reset(reset),
-        .pc(pc_value)
+        .pc(pc_value),
+        .next_pc(next_pc)
     );
     //grab instruction
     instruction_mem instr_mem(
@@ -122,6 +124,18 @@ module datapath(
     .result(alu_result),
     .zeroout(zero)
 );
+
+    brancher_jumper b_jmp(
+     .pc_value(pc_value),
+     .next_pc(next_pc),
+     .branch_eq(branch_eq),
+     .branch_ne(branch_ne),
+     .extended_imm(extended_imm),
+     .zero(zero),
+     .jump(jump),
+     .jump_address(instruction[11:0])
+
+    );
 
 data_memory data_mem(
     .clock(clock),
