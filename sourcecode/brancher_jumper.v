@@ -30,8 +30,9 @@ module brancher_jumper(
     input jump,
     output reg [15:0] next_pc
     );
-
-    wire beq_branch;                
+    
+    
+      wire beq_branch;                
     wire bne_branch;
 
     assign beq_branch = branch_eq & zero;   /*beq_branch holds result of the beq control signal ANDED with is_zero value */
@@ -61,6 +62,5 @@ module brancher_jumper(
     end
 
 
-
-
+    
 endmodule

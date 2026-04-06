@@ -40,8 +40,8 @@ module register_file(
             registers[i] = 16'd0;
             
             //temporary for testing
-            registers[1] = 16'd5;
-            registers[2] = 16'd7;
+         //   registers[1] = 16'd5;
+          //  registers[2] = 16'd7;
         end
         //assign data from registers
     assign data_read1 = registers[reg_read1];

@@ -25,7 +25,7 @@ module datapath(
     input reset
     );
     
-   // pc call 
+    // pc call 
     wire [15:0] pc_value;
     wire [15:0] next_pc;
     wire [15:0] instruction;
@@ -82,17 +82,20 @@ module datapath(
     wire [15:0] data_read1;
     wire [15:0] data_read2;
     wire [15:0] write_back_data;
+//to not override the current instruction
+   wire safe_reg_write;
+assign safe_reg_write = reg_write & ~reset;
 
-    register_file reg_file(
-        .clock(clock),
-        .reg_write(reg_write),
-        .reg_read1(rs),
-        .reg_read2(rtrd),
-        .write_reg(rtrd),
-        .data_write(write_back_data),
-        .data_read1(data_read1),
-        .data_read2(data_read2)
-    );
+register_file reg_file(
+    .clock(clock),
+    .reg_write(safe_reg_write),
+    .reg_read1(rs),
+    .reg_read2(rtrd),
+    .write_reg(rtrd),
+    .data_write(write_back_data),
+    .data_read1(data_read1),
+    .data_read2(data_read2)
+);
 
     // sign extend
     wire [15:0] extended_imm;
@@ -115,7 +118,6 @@ module datapath(
     // alu
     wire [15:0] alu_result;
     wire zero;
-    wire [15:0] memory_read_data;
 
     alu alu_unit(
     .operand1(data_read1),
@@ -126,18 +128,18 @@ module datapath(
 );
 
     brancher_jumper b_jmp(
-     .pc_value(pc_value),
-     .next_pc(next_pc),
-     .branch_eq(branch_eq),
-     .branch_ne(branch_ne),
-     .extended_imm(extended_imm),
-     .zero(zero),
-     .jump(jump),
-     .jump_address(instruction[11:0])
+        .pc_value(pc_value),
+        .next_pc(next_pc),
+        .branch_eq(branch_eq),
+        .branch_ne(branch_ne),
+        .extended_imm(extended_imm),
+        .zero(zero),
+        .jump(jump),
+        .jump_address(instruction[11:0])
 
     );
 
-data_memory data_mem(
+    data_memory data_mem(
     .clock(clock),
     .mem_read(mem_read),
     .mem_write(mem_write),

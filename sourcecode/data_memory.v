@@ -45,7 +45,6 @@ always @(*) begin
     else
         read_data = 16'b0;
 end
-
   
 
 endmodule
