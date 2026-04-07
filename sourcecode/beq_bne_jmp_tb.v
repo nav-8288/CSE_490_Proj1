@@ -64,7 +64,7 @@ brancher_jumper uut(
         branch_eq = 1'b0; /*val 0 in decimal, 0 indicates BEQ instruction NOT being examined */
         branch_ne = 1'b1; /*val 1 in decimal, 1 indicates BNE instruction  being examined */
         extended_imm = 16'd2;  /*the immediate value is 2 in decimal */ /*immediate_val << 1 = 4*/
-        zero = 1'b0; /*the zero val being decimal 0 indicates the BNE should NOT be taken  */
+        zero = 1'b0; /*the zero val being decimal 0 indicates the BNE should  be taken  */
         jump = 1'b0; /*jump val is 0 since its NOT being examined */
         jump_address = 12'b0; /*the jump address is 0 since NOT being examined (bits 11-0 ended in all 0's) */
         #10;
