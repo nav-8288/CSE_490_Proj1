@@ -33,8 +33,8 @@ module PC_Prototb;
     PC_Proto uut (
         .clock(clock),
         .reset(reset),
-        .pc(pc)
-        ,next_pc(next_pc)
+        .pc(pc),
+        .next_pc(next_pc)
     );
 
   
@@ -45,8 +45,8 @@ module PC_Prototb;
 
     
     initial begin
-        $display("Time\tclock\treset\tpc");
-        $monitor("%0t\t%b\t%b\t%h", $time, clock, reset, pc);
+        $display("Time\tclock\treset\tnext_pc\tpc");
+        $monitor("%0t\t%b\t%b\t%h\t%h", $time, clock, reset, next_pc, pc);
 
         reset = 1;   
         #12;         
@@ -63,3 +63,4 @@ module PC_Prototb;
     end
 
 endmodule
+
