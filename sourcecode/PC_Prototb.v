@@ -25,12 +25,16 @@ module PC_Prototb;
     reg clock;
     reg reset;
     wire [15:0] pc;
+    wire [15:0] next_pc;
+
+    assign next_pc = pc + 16'd2
 
     
     PC_Proto uut (
         .clock(clock),
         .reset(reset),
         .pc(pc)
+        ,next_pc(next_pc)
     );
 
   
