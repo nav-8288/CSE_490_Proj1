@@ -138,7 +138,9 @@ register_file reg_file(
         .jump_address(instruction[11:0])
 
     );
-
+    
+    wire [15:0] memory_read_data;
+    
     data_memory data_mem(
     .clock(clock),
     .mem_read(mem_read),

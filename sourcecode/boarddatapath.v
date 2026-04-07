@@ -19,26 +19,30 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
 module boarddatapath(
     input clock,
     input reset,
     input run,
     input [15:0] demo_instruction,
-    output [15:0] result_out
+    output [15:0] result_out,
+    output [15:0] pc_out,
+    output [15:0] instruction_out
     );
     
-   // pc call 
+    // pc call 
     wire [15:0] pc_value;
+    wire [15:0] next_pc;
     wire [15:0] instruction;
 
     PC_Proto pc_unit(
         .clock(clock),
         .reset(reset),
-        .pc(pc_value)
+        .pc(pc_value),
+        .next_pc(next_pc)
     );
+
     //grab instruction
-     assign instruction = demo_instruction;
+    assign instruction = demo_instruction;
 
     // seperate instruction fields into seperate wires
     wire [3:0] opcode;
@@ -61,8 +65,7 @@ module boarddatapath(
     wire branch_ne;
     wire jump;
     wire [1:0] alu_control;
-    wire real_reg_write;
-    assign real_reg_write = reg_write & run;
+
     //call control unit on these wires
     control_unit control(
         .opcode(opcode),
@@ -83,9 +86,14 @@ module boarddatapath(
     wire [15:0] data_read2;
     wire [15:0] write_back_data;
 
-    register_file reg_file(
+    //to not override the current instruction
+    wire safe_reg_write;
+    assign safe_reg_write = reg_write & ~reset & run;
+
+    board_register_file reg_file(
         .clock(clock),
-        .reg_write(real_reg_write),
+        .reset(reset),
+        .reg_write(safe_reg_write),
         .reg_read1(rs),
         .reg_read2(rtrd),
         .write_reg(rtrd),
@@ -117,15 +125,54 @@ module boarddatapath(
     wire zero;
 
     alu alu_unit(
-    .operand1(data_read1),
-    .operand2(alu_operand2),
-    .alu_control(alu_control),
-    .result(alu_result),
-    .zeroout(zero)
-);
+        .operand1(data_read1),
+        .operand2(alu_operand2),
+        .alu_control(alu_control),
+        .result(alu_result),
+        .zeroout(zero)
+    );
 
-    // writeback to alu for now with no memory
-    assign write_back_data = alu_result;
-    //for the board
-    assign result_out = alu_result;
+    brancher_jumper b_jmp(
+        .pc_value(pc_value),
+        .next_pc(next_pc),
+        .branch_eq(branch_eq),
+        .branch_ne(branch_ne),
+        .extended_imm(extended_imm),
+        .zero(zero),
+        .jump(jump),
+        .jump_address(instruction[11:0])
+    );
+
+    // data memory
+    wire [15:0] memory_read_data;
+
+    data_memory data_mem(
+        .clock(clock),
+        .mem_read(mem_read),
+        .mem_write(mem_write),
+        .address(alu_result),
+        .write_data(data_read2),
+        .read_data(memory_read_data)
+    );
+
+    mux writeback_mux(
+        .in0(alu_result),
+        .in1(memory_read_data),
+        .select(mem_to_reg),
+        .out(write_back_data)
+    );
+
+    reg [15:0] saved_result;
+
+    always @(posedge clock) begin
+        if (reset)
+            saved_result <= 16'd0;
+        else if (run)
+            saved_result <= write_back_data;
+    end
+
+    assign result_out = saved_result;
+    assign pc_out = pc_value;
+    assign instruction_out = instruction;
+
 endmodule

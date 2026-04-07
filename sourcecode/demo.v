@@ -21,55 +21,79 @@
 
 
 module demo(
-      input clk,
-    input btnU,
-    input btnL,
-    input btnR,
-    input btnD,
+    input clk,
     input btnC,
-    output [15:0] led
+    input [15:0] sw,
+    output reg [15:0] led
     );
 
-    reg [15:0] selected_instruction;
-    wire [15:0] result_out;
-reg last_btn;
-initial begin
-    last_btn = 1'b0;
-end
+    wire slow_clk;
+    
 
-    wire any_btn;
-    wire step;
-     assign any_btn = btnU | btnL | btnR | btnD;
-    assign step = any_btn & ~last_btn;
+  
+    reg last_run;
+    wire run_pulse;
+
+    initial begin
+        last_run = 1'b0;
+    end
+
+    clock_divider divider(
+        .clk(clk),
+        .slow_clk(slow_clk)
+    );
+
+    assign run_pulse = sw[15] & ~last_run;
+
+    always @(posedge slow_clk) begin
+        last_run <= sw[15];
+    end
+
+      wire [15:0] result_out;
+    wire [15:0] pc_out;
+    wire [15:0] instruction_out;
+reg [15:0] selected_instruction;
+
     boarddatapath datapath(
-        .clock(clk),
+        .clock(slow_clk),
         .reset(btnC),
-        .run(step),
+        .run(run_pulse),
         .demo_instruction(selected_instruction),
-        .result_out(result_out)
+        .result_out(result_out),
+        .pc_out(pc_out),
+        .instruction_out(instruction_out)
     );
-    
-     
-    
-    always @(posedge clk) begin
-        last_btn <= any_btn;
-    end
-    
-    
-    //pick an instruction
+
     always @(*) begin
-    //r1 will be 5, r2 will be 7 to start
-        if (btnU == 1'b1)
-            selected_instruction = 16'b0000_0001_0010_0000; //add r1 and r2 to r1
-        else if (btnL == 1'b1)
-            selected_instruction = 16'b0000_0001_0010_0001; //sub r1 and r2 to r1
-        else if (btnR == 1'b1)
-            selected_instruction = 16'b0000_0001_0010_0011; // and r1 and r2 to r1
-        else if (btnD == 1'b1)
-            selected_instruction = 16'b0000_0001_0010_0010; // sll r1 and r2 to r1
+        if (sw[3:0] == 4'b0000)
+            selected_instruction = 16'b0000_0001_0010_0000; // add
+        else if (sw[3:0] == 4'b0001)
+            selected_instruction = 16'b0000_0001_0010_0001; // sub
+        else if (sw[3:0] == 4'b0010)
+            selected_instruction = 16'b0000_0001_0010_0010; // sll
+        else if (sw[3:0] == 4'b0011)
+            selected_instruction = 16'b0000_0001_0010_0011; // and
+        else if (sw[3:0] == 4'b0100)
+            selected_instruction = 16'b0001_0001_0010_0010; // lw
+        else if (sw[3:0] == 4'b0101)
+            selected_instruction = 16'b0010_0001_0010_0010; // sw
+        else if (sw[3:0] == 4'b0110)
+            selected_instruction = 16'b0011_0001_0010_0011; // addi
         else
-            selected_instruction = 16'b1111_0000_0000_0000; // nothing 
+            selected_instruction = 16'b1111_0000_0000_0000; // nop
     end
 
-    assign led = result_out;
+    always @(*) begin
+        if (sw[15] == 1'b0)
+            led = 16'b0;
+        else if (sw[5:4] == 2'b00)
+            led = result_out;
+        else if (sw[5:4] == 2'b01)
+            led = pc_out;
+        else if (sw[5:4] == 2'b10)
+            led = instruction_out;
+        else
+            led = result_out;
+    end
+
 endmodule
