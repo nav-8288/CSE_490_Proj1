@@ -1,1 +1,7 @@
+Work Distribution
 
+Matthew - General datapath for R-type and addi, designing each required component for those to operate, including the control unit, register file, ALU, mux, instruction memory, and sign extender. 
+
+Joseph - Designed the logic and control path for load word instructions and store word instructions. Worked on subtractor logic. Designed test bench scripts for load and store. 
+
+Arnav - Designed the branch/jump logic for instructions beq, bne, and jmp, integrated the next-PC control path into the datapath and PC, worked on structural adder logic, but it was not used in the final version of the project.
