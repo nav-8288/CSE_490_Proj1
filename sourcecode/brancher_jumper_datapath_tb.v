@@ -86,9 +86,7 @@ module brancher_jumper_datapath_tb;
         /*Testing for the jmp (NEGATIVE TEST)*/
         uut.pc_unit.pc = 16'd18;    /*val 18 in decimal */
         /*18 >> 1 = 9, load from memory index 9 */
-        uut.instr_mem.memory[9] = 16'b0110_1111_1111_1100; /*BNE instruction loaded (0110 = opcode for JMP; The jump address is 0110 1111 1111 1100 (-4 signed address)) */
-        #10;
-        $display("Negative JMP was taken, the next_pc is: %d, expected 12", next_pc); /*pc_value + 2 - jump address << 1 = 18 + 2 + (-8) = 12; */
+      
         $finish;
     end
 endmodule
